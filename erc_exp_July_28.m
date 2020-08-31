@@ -198,26 +198,27 @@ if 1
         
     dur = 2048e-3;
     L = floor(dur*fs_new);
+    L_by_2 = floor(L/2);
 
     %calculate frequency bins with FFT
     df=fs_new/L; %frequency resolution
     sampleIndex = 0:L-1; %raw index for FFT plot
     f=sampleIndex*df; %x-axis index converted to frequencies
-    plot(f(1:floor(L/2)),abs(avg_fft_open_1(1:floor(L/2))));
+    plot(f(1:L_by_2),abs(avg_fft_open_1(1:L_by_2)));
     ylabel('FFT Magnitude (Avg)');
     xlabel('Frequency (Hz)');
     title('Eyes Open #1 (60 sec)');
 %     saveas(gcf, 'july-28/fig/eyes_open_erc_60s_1.jpg');
     
     figure,
-    plot(f(1:L/2),abs(avg_fft_close(1:L/2)));
+    plot(f(1:L_by_2),abs(avg_fft_close(1:L_by_2)));
     ylabel('FFT Magnitude (Avg)');
     xlabel('Frequency (Hz)');
     title('Eyes Closed (60 sec)');
 %     saveas(gcf, 'july-28/fig/eyes_closed_erc_60s_1.jpg');
     
     figure
-    plot(f(1:L/2),abs(avg_fft_open_2(1:L/2)));
+    plot(f(1:L_by_2),abs(avg_fft_open_2(1:L_by_2)));
     ylabel('FFT Magnitude (Avg)');
     xlabel('Frequency (Hz)');
     title('Eyes Open #2 (60 sec)');
