@@ -1,16 +1,14 @@
 clc;
 clear;
 close all;
-if 1
+if 0
     % Point-by-point analysis
     % Compare EEG recorded by Smarting and ERC point-by-point
     eeglab;
-    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
     fs_new = 120;
-    
+    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';        
     oddball_erc_file = 'ERC_alpha-trial.csv';
-    oddball_smarting_file = 'alpha-trial-1-[2020.07.28-16.22.34].gdf';
-    
+    oddball_smarting_file = 'alpha-trial-1-[2020.07.28-16.22.34].gdf';    
     oddball_erc_file = 'ERC_alpha-trial2.csv';
     oddball_smarting_file = 'alpha-trial-2-[2020.07.28-16.44.11].gdf';
     
@@ -141,21 +139,21 @@ if 1
 %     end
 end
 
-if 0
+if 1
     % Alpha wave analysis
     eeglab;
+    fs_new = 120;
+    %% July-28 data
     main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
     % Following files are with phones on airplance mode
 %     oddball_erc_file = 'ERC_eyeblink-trial.csv';
-%     oddball_smarting_file = 'eyeblink-trial-[2020.07.28-15.42.29].gdf';
-    fs_new = 120;
-    
+%     oddball_smarting_file = 'eyeblink-trial-[2020.07.28-15.42.29].gdf';     
     oddball_erc_file = 'ERC_alpha-trial.csv';
     oddball_smarting_file = 'alpha-trial-1-[2020.07.28-16.22.34].gdf';
     
     oddball_erc_file = 'ERC_alpha-trial2.csv';
     oddball_smarting_file = 'alpha-trial-2-[2020.07.28-16.44.11].gdf';
-    
+    %%
     EEG_smarting = pop_biosig(fullfile(main_fldr, oddball_smarting_file));
     
     EEG_smarting = pop_select( EEG_smarting,'channel',{'Channel 1'});
@@ -197,7 +195,10 @@ if 0
 %% Calculate FFT and average        
     
     [avg_fft_open_1,avg_fft_open_2,avg_fft_close] = alpha_analyse(eeg_raw_struct, fs_new);
-    
+        
+    dur = 2048e-3;
+    L = floor(dur*fs_new);
+
     %calculate frequency bins with FFT
     df=fs_new/L; %frequency resolution
     sampleIndex = 0:L-1; %raw index for FFT plot
