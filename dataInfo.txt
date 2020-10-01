@@ -1,0 +1,23 @@
+% Data Info:
+
+
+% August 31:
+% Location of data
+main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-new-bandpass-cutoff-July-31/data';
+
+%%% Alpha experiment %%%
+
+%% 60s eyes closed %% 
+% ERC EEG file
+erc_file = 'alpha_trial_03.csv';
+% Smarting EEG file
+smarting_file = 'alpha-trial-2-1min-[2020.08.31-16.32.51].gdf';
+
+
+%%% Oddball Experiment %%% 
+% Location of data
+main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-new-bandpass-cutoff-July-31/data';
+% ERC EEG file
+oddball_erc_file = 'oddBall_01.csv';
+% Smarting EEG file
+oddball_smarting_file = 'ercboard-v-smarting-oddball-test-1-[2020.08.31-16.57.44].gdf';
