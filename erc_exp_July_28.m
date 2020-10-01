@@ -1,17 +1,22 @@
 clc;
 clear;
 close all;
-if 0
+if 1
     % Point-by-point analysis
     % Compare EEG recorded by Smarting and ERC point-by-point
     eeglab;
     fs_new = 120;
-    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';        
-    oddball_erc_file = 'ERC_alpha-trial.csv';
-    oddball_smarting_file = 'alpha-trial-1-[2020.07.28-16.22.34].gdf';    
-    oddball_erc_file = 'ERC_alpha-trial2.csv';
-    oddball_smarting_file = 'alpha-trial-2-[2020.07.28-16.44.11].gdf';
+%     main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';        
+%     oddball_erc_file = 'ERC_alpha-trial.csv';
+%     oddball_smarting_file = 'alpha-trial-1-[2020.07.28-16.22.34].gdf';    
+%     oddball_erc_file = 'ERC_alpha-trial2.csv';
+%     oddball_smarting_file = 'alpha-trial-2-[2020.07.28-16.44.11].gdf';
     
+        %% August-31 data
+    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-new-bandpass-cutoff-July-31/data';
+    oddball_erc_file = 'alpha_trial_03.csv';
+    oddball_smarting_file = 'alpha-trial-2-1min-[2020.08.31-16.32.51].gdf';
+    %%
     EEG_smarting = pop_biosig(fullfile(main_fldr, oddball_smarting_file));    
     EEG_smarting = pop_select( EEG_smarting,'channel',{'Channel 1'});
      %Index of audio trigger events in Smarting data
@@ -19,7 +24,7 @@ if 0
     
     EEG_smarting = pop_resample(EEG_smarting, fs_new);
     EEG_smarting = pop_eegfiltnew(EEG_smarting, [],0.5,[],true); %HP filtering (Filter DC)
-    EEG_smarting = pop_eegfiltnew(EEG_smarting, [],40); %LP filtering
+    EEG_smarting = pop_eegfiltnew(EEG_smarting, [],20); %LP filtering
     
     for i = 1:numel(smarting_events)
         event_lats(i) = EEG_smarting.event(smarting_events(i)).latency;
@@ -50,7 +55,7 @@ if 0
     eeg_raw_struct.times = round((1:eeg_raw_struct.pnts)*1e3/fs_erc);
     eeg_raw_struct = pop_resample(eeg_raw_struct, fs_new);
     eeg_raw_struct = pop_eegfiltnew(eeg_raw_struct, [],0.5,[],true); %HP filtering (Filter DC)
-    eeg_raw_struct = pop_eegfiltnew(eeg_raw_struct, [],40); %LP filtering
+    eeg_raw_struct = pop_eegfiltnew(eeg_raw_struct, [],20); %LP filtering
     %%
     % Add Smarting data as an extra channel in eeg_raw_struct
     eeg_raw_struct.nbchan = 2;
@@ -67,28 +72,37 @@ if 0
         eeg_raw_struct.event(num_of_events+i) = EEG_smarting.event(i);
         eeg_raw_struct.event(num_of_events+i).urevent = num_of_events+i;
     end
-    %%
-    eeg_raw_struct.data(1,:) = 1e3*eeg_raw_struct.data(1,:);
+    %%    
+    eeg_raw_struct.data(1,:) = -1e3*eeg_raw_struct.data(1,:);
+%     pop_eegplot(eeg_raw_struct);
     [c,lags] = xcorr(eeg_raw_struct.data(1,:),eeg_raw_struct.data(2,:));
     [mx,id] = max(c);
     lagval = lags(id);
     
-    dur = 10;
+    tmpdat = eeg_raw_struct.data(1,lagval+1:end);
+    tmpdat = [tmpdat,zeros(1,lagval)];
+    eeg_raw_struct.data(1,:) = tmpdat;
+    
+    dur = 5;
     smpls = dur*fs_new;
     strt = 1;
     stp = strt+smpls-1;
     x_time = (strt:stp)*(1/fs_new);
 %     
-%     figure,
-%     while (stp+lagval<=size(eeg_raw_struct.data,2))
-%         plot(x_time,eeg_raw_struct.data(1,strt+lagval:stp+lagval));
-%         hold on;
-%         plot(x_time,eeg_raw_struct.data(2,strt:stp));
-%         hold off;
-%         legend('ERC','Smarting');
-%         strt = stp+1;
-%         stp = strt+smpls-1;
-%     end
+    figure,
+    while (stp<=size(eeg_raw_struct.data,2))
+        plot(x_time,eeg_raw_struct.data(1,strt:stp));
+        hold on;
+        plot(x_time,eeg_raw_struct.data(2,strt:stp));
+        xlabel('Time (s)');
+        ylabel('Amplitude (uV)')
+        hold off;
+        legend('ERC','Smarting');
+        axis([x_time(1) x_time(end) -70 70])
+        strt = stp+1;
+        stp = strt+smpls-1;
+        x_time = (strt:stp)*(1/fs_new);
+    end
     
     dur = 2;
     smpls = dur*fs_new;
@@ -139,28 +153,32 @@ if 0
 %     end
 end
 
-if 1
+if 0
     % Alpha wave analysis
     eeglab;
     fs_new = 120;
     %% July-28 data
-    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
+%     main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
     % Following files are with phones on airplance mode
 %     oddball_erc_file = 'ERC_eyeblink-trial.csv';
 %     oddball_smarting_file = 'eyeblink-trial-[2020.07.28-15.42.29].gdf';     
-    oddball_erc_file = 'ERC_alpha-trial.csv';
-    oddball_smarting_file = 'alpha-trial-1-[2020.07.28-16.22.34].gdf';
-    
-    oddball_erc_file = 'ERC_alpha-trial2.csv';
-    oddball_smarting_file = 'alpha-trial-2-[2020.07.28-16.44.11].gdf';
+%     oddball_erc_file = 'ERC_alpha-trial.csv';
+%     oddball_smarting_file = 'alpha-trial-1-[2020.07.28-16.22.34].gdf';
+%     
+%     oddball_erc_file = 'ERC_alpha-trial2.csv';
+%     oddball_smarting_file = 'alpha-trial-2-[2020.07.28-16.44.11].gdf';
+    %% August-31 data
+    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-new-bandpass-cutoff-July-31/data';
+    oddball_erc_file = 'alpha_trial_03.csv';
+    oddball_smarting_file = 'alpha-trial-2-1min-[2020.08.31-16.32.51].gdf';
     %%
     EEG_smarting = pop_biosig(fullfile(main_fldr, oddball_smarting_file));
     
     EEG_smarting = pop_select( EEG_smarting,'channel',{'Channel 1'});
-    EEG_smarting = pop_resample(EEG_smarting, fs_new);
-    EEG_smarting = pop_eegfiltnew(EEG_smarting, [],0.5,[],true); %HP filtering
-    EEG_smarting = pop_eegfiltnew(EEG_smarting, [],20); %LP filtering
-    smarting_eeg_data_filtered = EEG_smarting.data(1,:)'; % EEG data
+%     EEG_smarting = pop_resample(EEG_smarting, fs_new);
+%     EEG_smarting = pop_eegfiltnew(EEG_smarting, [],0.5,[],true); %HP filtering
+%     EEG_smarting = pop_eegfiltnew(EEG_smarting, [],20); %LP filtering
+%     smarting_eeg_data_filtered = EEG_smarting.data(1,:)'; % EEG data
     
     EEG_ercboard = csvread(fullfile(main_fldr, oddball_erc_file),2,0);
     fs_smarting = EEG_smarting.srate;
@@ -192,43 +210,43 @@ if 1
     
 %     smarting_eeg_resampled = resample(double(smarting_data'),120,fs_smarting);
 %     smarting_eeg_data_filtered = filtfilt(BP_equirip.numerator, 1, double(smarting_eeg_resampled));
-%% Calculate FFT and average        
+%% Calculate FFT and average  
+    eeg_test = eeg_raw_struct;
+    [avg_fft_open_1,avg_fft_open_2,avg_fft_close] = alpha_analyse(eeg_test, fs_new, dur);
     
-    [avg_fft_open_1,avg_fft_open_2,avg_fft_close] = alpha_analyse(eeg_raw_struct, fs_new);
-        
-    dur = 2048e-3;
-    L = floor(dur*fs_new);
-    L_by_2 = floor(L/2);
+    savepath = 'aug-31/figs';
+    ffts = [avg_fft_open_1,avg_fft_close,avg_fft_open_2];
+    title_str = {'ERC Eyes Open #1 (60 sec)','ERC Eyes Closed (60 sec)','ERC Eyes Open #2 (60 sec)'};
+    save_str = {'erc_eye_open_1','erc_eye_close_1','erc_eye_open_2'};
+    for i = 1:3
+        fftstoplot(i).data = ffts(:,i);
+        fftstoplot(i).fs = fs_new;
+        fftstoplot(i).L = size(fftstoplot(i).data,1);
+        fftstoplot(i).title = title_str{i};
+        fftstoplot(i).savestr = save_str{i};
+    end
+    plot_fft_analysis(fftstoplot, 1, savepath);
+                
+    eeg_test = EEG_smarting;
+    [avg_fft_open_1,avg_fft_open_2,avg_fft_close] = alpha_analyse(eeg_test, fs_new, dur);
+    ffts = [avg_fft_open_1,avg_fft_close,avg_fft_open_2];
+    title_str = {'Smarting Eyes Open #1 (60 sec)','Smarting Eyes Closed (60 sec)','Smarting Eyes Open #2 (60 sec)'};
+    save_str = {'smarting_eye_open_1','smarting_eye_close_1','smarting_eye_open_2'};
+    for i = 1:3
+        fftstoplot(i).data = ffts(:,i);
+        fftstoplot(i).fs = fs_new;
+        fftstoplot(i).L = size(fftstoplot(i).data,1);
+        fftstoplot(i).title = title_str{i};
+        fftstoplot(i).savestr = save_str{i};
+    end
+    plot_fft_analysis(fftstoplot, 1, savepath);
 
-    %calculate frequency bins with FFT
-    df=fs_new/L; %frequency resolution
-    sampleIndex = 0:L-1; %raw index for FFT plot
-    f=sampleIndex*df; %x-axis index converted to frequencies
-    plot(f(1:L_by_2),abs(avg_fft_open_1(1:L_by_2)));
-    ylabel('FFT Magnitude (Avg)');
-    xlabel('Frequency (Hz)');
-    title('Eyes Open #1 (60 sec)');
-%     saveas(gcf, 'july-28/fig/eyes_open_erc_60s_1.jpg');
-    
-    figure,
-    plot(f(1:L_by_2),abs(avg_fft_close(1:L_by_2)));
-    ylabel('FFT Magnitude (Avg)');
-    xlabel('Frequency (Hz)');
-    title('Eyes Closed (60 sec)');
-%     saveas(gcf, 'july-28/fig/eyes_closed_erc_60s_1.jpg');
-    
-    figure
-    plot(f(1:L_by_2),abs(avg_fft_open_2(1:L_by_2)));
-    ylabel('FFT Magnitude (Avg)');
-    xlabel('Frequency (Hz)');
-    title('Eyes Open #2 (60 sec)');
-%     saveas(gcf, 'july-28/fig/eyes_open_erc_60s_2.jpg');
 end
 
 if 0
     % Oddball experiment analysis
     
-    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
+%     main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
     
     % Add the peak-detection function to the MATLAB path
     % The toolbox is attached with the email
@@ -237,8 +255,13 @@ if 0
 %     oddball_smarting_file = 'ercboard-v-smarting-oddball-test-1-[2020.07.28-17.00.19].gdf';
 %     oddball_erc_file = 'ERC_oddBall_trial.csv';
     
-    oddball_smarting_file = 'ercboard-v-smarting-oddball-test-2-without-sound-noise-[2020.07.28-17.34.05].gdf';
-    oddball_erc_file = 'ERC_oddBall_trial2.csv';
+%     oddball_smarting_file = 'ercboard-v-smarting-oddball-test-2-without-sound-noise-[2020.07.28-17.34.05].gdf';
+%     oddball_erc_file = 'ERC_oddBall_trial2.csv';
+    
+    %%
+    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-new-bandpass-cutoff-July-31/data';
+    oddball_erc_file = 'oddBall_01.csv';
+    oddball_smarting_file = 'ercboard-v-smarting-oddball-test-1-[2020.08.31-16.57.44].gdf';
     
     EEG_smarting = pop_biosig(fullfile(main_fldr, oddball_smarting_file));
     EEG_ercboard = csvread(fullfile(main_fldr, oddball_erc_file),2,0);
@@ -254,7 +277,7 @@ if 0
     plot(x_axis,erc_trigger_data(1:length(x_axis)));
     title('Recorded Audio triggers: NOTE (Zoomin)');
 
-    peak_thr = 0.3; % For trial-1
+    peak_thr = 0.25; % For trial-1
 %     peak_thr = 0.315; % For trial-2
     sel_events = extract_trigger_events(erc_trigger_data, fs_erc, peak_thr);
 
@@ -311,13 +334,16 @@ if 0
 %     
     % Analyse ERC data
     oddball_analyse(EEG_erc, 1, 'ERC Data');
+    
+    % Analyse Smarting data
+    oddball_analyse(EEG_smarting, 1, 'Smarting Data');
 end
 
 if 0
     % Oddball experiment analysis
     eeglab;
     close all;
-    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
+%     main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-board-July-28-2020/data';
     
     % Add the peak-detection function to the MATLAB path
     % The toolbox is attached with the email
@@ -326,11 +352,12 @@ if 0
 %     oddball_smarting_file = 'ercboard-v-smarting-oddball-test-1-[2020.07.28-17.00.19].gdf';
 %     oddball_erc_file = 'ERC_oddBall_trial.csv';
     
-    oddball_smarting_file = 'ercboard-v-smarting-oddball-test-2-without-sound-noise-[2020.07.28-17.34.05].gdf';
-    oddball_erc_file = 'ERC_oddBall_trial2.csv';
+%     oddball_smarting_file = 'ercboard-v-smarting-oddball-test-2-without-sound-noise-[2020.07.28-17.34.05].gdf';
+%     oddball_erc_file = 'ERC_oddBall_trial2.csv';
+    
     
     EEG_smarting = pop_biosig(fullfile(main_fldr, oddball_smarting_file));
-    EEG_smarting = pop_select( EEG_smarting,'channel',{'Channel 1','Channel 2'});
+    EEG_smarting = pop_select( EEG_smarting,'channel',{'Channel 1'});
     
     EEG_ercboard = csvread(fullfile(main_fldr, oddball_erc_file),2,0);
     erc_trigger_data = EEG_ercboard(:,3); % Audio triggers recorded by ERC
