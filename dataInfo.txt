@@ -21,3 +21,39 @@ main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarti
 oddball_erc_file = 'oddBall_01.csv';
 % Smarting EEG file
 oddball_smarting_file = 'ercboard-v-smarting-oddball-test-1-[2020.08.31-16.57.44].gdf';
+
+% October 1
+main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/1-Oct-2020';
+
+%%% Alpha experiment %%%
+
+%% 60s eyes closed %% 
+
+% ERC EEG file
+erc_file = 'mariaAlpha01.csv'
+
+% Smarting EEG file
+smarting_file = 'two-electrode-circuit-alpha-1-60s-[2020.10.01-15.18.53].gdf' %  Three-electrode recording; channel 2 from scalp
+
+
+% October 11
+
+main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/11-Oct-2020';
+
+%%% Alpha experiment %%%
+
+%% 60s eyes closed %% 
+
+% ERC EEG file
+erc_file = 'MariaALpha_12_10_20__01.csv';
+
+% Smarting EEG file
+smarting_file = 'alphat-test-1-[2020.10.12-16.00.03].gdf' %  Two-electrode recording; channels behind two-ears
+
+%%% Oddball Experiment %%%
+
+% ERC EEG File %
+oddball_erc_file = 'MariaOddBall_12_10_20__01.csv';
+
+% Smarting EEG file %
+oddball_smarting_file = 'two-electrode-oddball-1-[2020.10.12-16.54.14].gdf';

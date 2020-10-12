@@ -9,8 +9,8 @@ function plot_fft_analysis(fftstoplot, savefig, savepath)
     else
         savefig = 0;
     end
-    
-    for i = 1:size(fftstoplot,2)
+    figure
+    for i = 1:size(fftstoplot,2)        
         L = fftstoplot(i).L;
         L_by_2 = floor(L/2);
         fftdata = fftstoplot(i).data;
@@ -25,9 +25,11 @@ function plot_fft_analysis(fftstoplot, savefig, savepath)
         plot(f(1:L_by_2),abs(fftdata(1:L_by_2)));
         ylabel('FFT Magnitude (Avg)');
         xlabel('Frequency (Hz)');
-        title(title_str);
-        if(savefig)
-            saveas(gcf, fullfile(savepath,savestr),'jpg');
-        end
+        hold on;        
+        
+    end
+    legend({fftstoplot(:).title});
+    if(savefig)
+        saveas(gcf, fullfile(savepath,savestr),'jpg');
     end
 end
