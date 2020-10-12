@@ -5,7 +5,6 @@ function [avg_fft_open_1,avg_fft_open_2,avg_fft_close] = alpha_analyse(EEG, fs_n
     EEGfilt = EEG.data(1,:)';
     
     strt = 16;
-%     dur = 60;
     stp = strt+dur;
     eye_open_1_erc = EEGfilt(strt*fs_new+1:stp*fs_new);
     
