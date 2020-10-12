@@ -13,9 +13,18 @@ if 1
 %     oddball_smarting_file = 'alpha-trial-2-[2020.07.28-16.44.11].gdf';
     
         %% August-31 data
-    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-new-bandpass-cutoff-July-31/data';
-    oddball_erc_file = 'alpha_trial_03.csv';
-    oddball_smarting_file = 'alpha-trial-2-1min-[2020.08.31-16.32.51].gdf';
+%     main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/erc-new-bandpass-cutoff-July-31/data';
+%     oddball_erc_file = 'alpha_trial_03.csv';
+%     oddball_smarting_file = 'alpha-trial-2-1min-[2020.08.31-16.32.51].gdf';
+    
+    %% October 1 data
+    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/1-Oct-2020';
+    oddball_erc_file = 'mariaAlpha03.csv';
+    oddball_smarting_file = 'two-electrode-circuit-alpha-2-60s-[2020.10.01-16.08.56].gdf' %  Three-electrode recording; channel 2 from scalp
+    
+    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/11-Oct-2020';
+    oddball_erc_file = 'MariaALpha_12_10_20__01.csv';
+    oddball_smarting_file = 'alphat-test-1-[2020.10.12-16.00.03].gdf';
     %%
     EEG_smarting = pop_biosig(fullfile(main_fldr, oddball_smarting_file));    
     EEG_smarting = pop_select( EEG_smarting,'channel',{'Channel 1'});
@@ -73,11 +82,14 @@ if 1
         eeg_raw_struct.event(num_of_events+i).urevent = num_of_events+i;
     end
     %%    
-    eeg_raw_struct.data(1,:) = -1e3*eeg_raw_struct.data(1,:);
+    eeg_raw_struct.data(1,:) = 1e3*eeg_raw_struct.data(1,:);
 %     pop_eegplot(eeg_raw_struct);
     [c,lags] = xcorr(eeg_raw_struct.data(1,:),eeg_raw_struct.data(2,:));
     [mx,id] = max(c);
     lagval = lags(id);
+    if(lagval<0)
+        lagval = 0;
+    end
     
     tmpdat = eeg_raw_struct.data(1,lagval+1:end);
     tmpdat = [tmpdat,zeros(1,lagval)];
