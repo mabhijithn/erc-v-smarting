@@ -9,7 +9,13 @@ function plot_fft_analysis(fftstoplot, savefig, savepath)
     else
         savefig = 0;
     end
-    figure
+    
+    width = 3.25;
+    height=2.75;
+    
+    figure('Units','inches',...
+    'Position',[0 0 width height],...
+    'PaperPositionMode','auto');
     for i = 1:size(fftstoplot,2)        
         L = fftstoplot(i).L;
         L_by_2 = floor(L/2);
@@ -25,11 +31,13 @@ function plot_fft_analysis(fftstoplot, savefig, savepath)
         plot(f(1:L_by_2),abs(fftdata(1:L_by_2)));
         ylabel('FFT Magnitude (Avg)');
         xlabel('Frequency (Hz)');
-        hold on;        
-        
+        axis([0 40 0 170]);
+        set(gca,'XTick',[0 5 10 15 20 40]);
+        grid on;
+        hold on;                
     end
     legend({fftstoplot(:).title});
     if(savefig)
-        saveas(gcf, fullfile(savepath,savestr),'jpg');
+        saveas(gcf, fullfile(savepath,savestr),'epsc');
     end
 end

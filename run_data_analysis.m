@@ -5,7 +5,7 @@ close all;
 % Add the peak-detection function to the MATLAB path
 addpath('/home/abhijith/Documents/MATLAB/toolboxes/pan_tompkin');
 
-if 1
+if 0
     % Alpha analysis
     eeglab; close all;
     
@@ -24,6 +24,7 @@ if 1
     erc_file = 'alpha_trial_03.csv';
     erc_file = 'mariaAlpha03.csv';
     erc_file = 'MariaALpha_12_10_20__01.csv';
+    
     
     
     % Smarting EEG file
@@ -89,12 +90,21 @@ if 1
     end
 end
 
-if 0    
+if 1
     %% Time domain analysis of data
+    eeglab; close all;
+     
+    width = 3.25;
+    height=2.75;
+    main_fldr = '/home/abhijith/MEGAsync/PhD/2019/masters_thesis_micas/ERC_vs_Smarting/11-Oct-2020';
     
+    fs_new = 120;
     smarting_file = 'alphat-test-1-[2020.10.12-16.00.03].gdf';
-    erc_file = 'MariaALpha_12_10_20__01.csv';
-    EEG_smarting = pop_biosig(fullfile(main_fldr, oddball_smarting_file));    
+    smarting_file = 'two-electrode-oddball-1-[2020.10.12-16.54.14].gdf';
+    erc_file = 'MariaALpha_12_10_20__01.csv';    
+    erc_file = 'MariaOddBall_12_10_20__01.csv';
+    
+    EEG_smarting = pop_biosig(fullfile(main_fldr, smarting_file));    
     EEG_smarting = pop_select( EEG_smarting,'channel',{'Channel 1'});
      %Index of audio trigger events in Smarting data
     smarting_events = find([EEG_smarting.event.type]==33027);
@@ -107,7 +117,7 @@ if 0
         event_lats(i) = EEG_smarting.event(smarting_events(i)).latency;
     end
     
-    EEG_ercboard = csvread(fullfile(main_fldr, oddball_erc_file),2,0);
+    EEG_ercboard = csvread(fullfile(main_fldr, erc_file),2,0);
     fs_erc = 1000;   
     
 %     smarting_trigger_data = EEG_smarting.data(2,:); % EEG data
@@ -153,7 +163,7 @@ if 0
     eeg_raw_struct.data(1,:) = 1e3*eeg_raw_struct.data(1,:);
 %     pop_eegplot(eeg_raw_struct);
     [c,lags] = xcorr(eeg_raw_struct.data(1,:),eeg_raw_struct.data(2,:));
-    [mx,id] = max(c);
+    [mx,id] = max(abs(c));
     lagval = lags(id);
     if(lagval<0)
         lagval = 0;
@@ -165,20 +175,28 @@ if 0
     
     dur = 5;
     smpls = dur*fs_new;
-    strt = 1;
+    strt = 1*fs_new;
     stp = strt+smpls-1;
     x_time = (strt:stp)*(1/fs_new);
 %     
-    figure,
+    k = 1;
+    figure('Units','inches',...
+    'Position',[0 0 width height],...
+    'PaperPositionMode','auto');
+    savefig = 1;
     while (stp<=size(eeg_raw_struct.data,2))
         plot(x_time,eeg_raw_struct.data(1,strt:stp));
         hold on;
-        plot(x_time,eeg_raw_struct.data(2,strt:stp));
+        plot(x_time,(-1)*eeg_raw_struct.data(2,strt:stp));
         xlabel('Time (s)');
         ylabel('Amplitude (uV)')
         hold off;
-        legend('ERC','Smarting');
+        legend('ERC','Smarting');  
         axis([x_time(1) x_time(end) -70 70])
+        if(savefig)
+            saveas(gcf,sprintf('oct-11/figs/td-oddball-exp-%d.eps',k));
+            k = k+1;
+        end
         strt = stp+1;
         stp = strt+smpls-1;
         x_time = (strt:stp)*(1/fs_new);
@@ -195,7 +213,9 @@ if 0
     sampleIndex = 0:L-1; %raw index for FFT plot
     f=sampleIndex*df; %x-axis index converted to frequencies 
    
-    figure,
+    figure('Units','inches',...
+    'Position',[0 0 width height],...
+    'PaperPositionMode','auto');
     while (stp+lagval<=size(eeg_raw_struct.data,2))
         str = sprintf('%3.2f to %3.2f sec',strt/fs_new,stp/fs_new);
         erc_sig = eeg_raw_struct.data(1,strt+lagval:stp+lagval);
@@ -244,13 +264,12 @@ if 0
     smarting_trigger_data = EEG_smarting.data(2,:); % EEG data
     erc_trigger_data = EEG_ercboard(:,3); % Audio triggers recorded by ERC
     
-    peak_thr = 0.4; % For trial-1
+    peak_thr = 0.25; % For trial-1
 %     peak_thr = 0.315; % For trial-2
     sel_events = extract_trigger_events(erc_trigger_data, fs_erc, peak_thr);
 
     % Analyse Smarting data
     EEG_smarting.data = -1*EEG_smarting.data;
-    oddball_analyse(EEG_smarting, 1, 'Smarting Data'); 
     
     % Index of oddball events in Smarting data
     smarting_events = find([EEG_smarting.event.type]==33025 | [EEG_smarting.event.type]==33026); 
@@ -269,9 +288,13 @@ if 0
         EEG_erc.event(smarting_events(i)).latency =  sel_events(i);
     end
     
+    savepath = 'oct-11/figs';
+    
+    savestr = fullfile(savepath,'erc-oddball.eps');
     % Analyse ERC data
-    oddball_analyse(EEG_erc, 1, 'ERC Data');
+    oddball_analyse(EEG_erc, 1, 'ERC Data', 1, savestr);
     
     % Analyse Smarting data
-    oddball_analyse(EEG_smarting, 1, 'Smarting Data');
+    savestr = fullfile(savepath,'smarting-oddball.eps');
+    oddball_analyse(EEG_smarting, 1, 'Smarting Data',1, savestr);
 end
